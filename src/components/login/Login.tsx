@@ -1,7 +1,84 @@
-import Key from "../../assets/key.svg?react";
-import Person from "../../assets/person.svg?react";
+import { useState } from "react";
+import LoginInput from "./LoginInput";
 
 export default function Login() {
+  const [isRegister, setIsRegister] = useState(false);
+
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [repeatedPass, setRepeatedPass] = useState("");
+
+  const [usernameWarn, setUsernameWarn] = useState("");
+  const [passwordWarn, setPasswordWarn] = useState("");
+  const [repeatedPassWarn, setRepeatedPassWarn] = useState("");
+  const [generalWarn, setGeneralWarn] = useState("");
+
+  function toggleRegister() {
+    setUsernameWarn("");
+    setPasswordWarn("");
+    setRepeatedPassWarn("");
+    setGeneralWarn("");
+
+    setPassword("");
+    setRepeatedPass("");
+
+    setIsRegister(!isRegister);
+  }
+
+  async function logIn() {
+    let abort = false;
+
+    setUsernameWarn("");
+    setPasswordWarn("");
+    setGeneralWarn("");
+
+    if (username.length < 4) {
+      setUsernameWarn("Username can't be shorter than 4 characters");
+      abort = true;
+    }
+
+    if (password.length < 4) {
+      setPasswordWarn("Password can't be shorter than 4 characters");
+      abort = true;
+    }
+
+    if (abort) {
+      return;
+    }
+
+    setGeneralWarn("Login is not implemented");
+  }
+
+  async function register() {
+    let abort = false;
+
+    setUsernameWarn("");
+    setPasswordWarn("");
+    setRepeatedPassWarn("");
+    setGeneralWarn("");
+
+    if (username.length < 4) {
+      setUsernameWarn("Username is too short");
+      abort = true;
+    }
+
+    if (password.length < 4) {
+      setPasswordWarn("Password is too short");
+      abort = true;
+    }
+
+    if (password !== repeatedPass) {
+      setRepeatedPassWarn("Passwords don't match");
+      abort = true;
+    }
+
+    if (abort) {
+      return;
+    }
+
+    setGeneralWarn("Register is not implemented");
+  }
+
   return (
     <div className="flex h-dvh">
       <div
@@ -11,54 +88,72 @@ export default function Login() {
         }
       >
         <h1 className="text-4xl text-center mb-8 leading-tight md:mb-10">
-          Log in to the <br className="md:hidden" />
-          chat app
+          {!isRegister ? (
+            <>
+              Log in to the <br className="md:hidden" />
+              chat app
+            </>
+          ) : (
+            <>Create a new account</>
+          )}
         </h1>
 
-        <div className="flex w-full mb-8 gap-4 md:mb-10">
-          <Person className="h-12 w-10" />
-          <input
-            type="text"
-            placeholder="Username"
-            className={
-              "w-full bg-dark-3 p-3 rounded-md " +
-              "focus:outline focus:outline-2 focus:outline-rose-600"
-            }
-          />
-        </div>
+        {generalWarn && (
+          <div className="text-red-500 mb-8 text-center text-lg">
+            {generalWarn}
+          </div>
+        )}
 
-        <div className="flex w-full mb-8 gap-4 md:mb-10">
-          <Key className="rotate-45 h-12 w-10" />
-          <input
-            type="password"
-            placeholder="Password"
-            className={
-              "w-full bg-dark-3 p-3 rounded-md " +
-              "focus:outline focus:outline-2 focus:outline-rose-600"
-            }
-          />
-        </div>
+        <LoginInput
+          icon="profile"
+          errorMessage={usernameWarn}
+          inputType="text"
+          inputPlaceholder="Username"
+          inputValue={username}
+          onInput={(val) => setUsername(val)}
+        />
 
-        <div className=" flex">
+        <LoginInput
+          icon="key"
+          errorMessage={passwordWarn}
+          inputType="password"
+          inputPlaceholder="Password"
+          inputValue={password}
+          onInput={(val) => setPassword(val)}
+        />
+
+        {isRegister && (
+          <LoginInput
+            errorMessage={repeatedPassWarn}
+            inputType="password"
+            inputPlaceholder="Repeat password"
+            inputValue={repeatedPass}
+            onInput={(val) => setRepeatedPass(val)}
+          />
+        )}
+
+        <div className="flex">
           <button
+            onClick={toggleRegister}
             className={
               "text-rose-500 py-2 px-4 rounded-md transition-all " +
               "hover:text-rose-600 hover:bg-[#00000020] active:text-rose-700 active:bg-[#00000030]"
             }
           >
-            Or register
+            {!isRegister ? <>Or register</> : <>Or log in</>}
           </button>
 
           <div className="flex-1" />
 
           <button
+            onClick={!isRegister ? logIn : register}
             type="button"
             className={
               "bg-rose-600 py-2 px-4 rounded-md transition-all " +
               "hover:bg-rose-700 hover:text-neutral-300 active:bg-rose-800 active:text-neutral-400"
             }
           >
-            Log In
+            {!isRegister ? <>Log In</> : <>Register</>}
           </button>
         </div>
       </div>
