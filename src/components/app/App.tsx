@@ -1,12 +1,15 @@
 import { useState } from "react";
 import viteLogo from "/vite.svg";
+import ChatNavigation from "./ChatNavigation";
 
 function App() {
   const [count, setCount] = useState(0);
 
   return (
     <>
-      <div className="w-full bg-dark-3 text-4xl p-8 text-light-test">
+      <ChatNavigation />
+
+      {/* <div className="w-full bg-dark-3 text-4xl p-8 text-light-test">
         Hello there again
       </div>
       <div>
@@ -26,7 +29,7 @@ function App() {
       </div>
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
-      </p>
+      </p> */}
     </>
   );
 }

@@ -10,3 +10,8 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(69, 69, 69) hsl(250, 11%, 12%);
+}

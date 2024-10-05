@@ -5,6 +5,7 @@ export default {
     extend: {
       colors: {
         "dark-1": "hsl(250, 11%, 11%)",
+        "dark-1.5": "hsl(250, 11%, 12%)",
         "dark-2": "hsl(250, 11%, 13%)",
         "dark-3": "hsl(250, 11%, 16%)",
         "light-1": "hsl(250, 100%, 100%)",
