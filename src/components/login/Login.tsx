@@ -1,8 +1,11 @@
 import { useState } from "react";
 import LoginInput from "./LoginInput";
+import requests from "../../requests";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
+  const navigate = useNavigate();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -33,12 +36,12 @@ export default function Login() {
     setGeneralWarn("");
 
     if (username.length < 4) {
-      setUsernameWarn("Username can't be shorter than 4 characters");
+      setUsernameWarn("Username is too short");
       abort = true;
     }
 
     if (password.length < 4) {
-      setPasswordWarn("Password can't be shorter than 4 characters");
+      setPasswordWarn("Password is too short");
       abort = true;
     }
 
@@ -46,7 +49,17 @@ export default function Login() {
       return;
     }
 
-    setGeneralWarn("Login is not implemented");
+    const result = await requests.login({
+      username: username,
+      password: password,
+    });
+
+    if (result.message) {
+      setGeneralWarn(result.message);
+      return;
+    }
+
+    navigate("/");
   }
 
   async function register() {
@@ -76,7 +89,17 @@ export default function Login() {
       return;
     }
 
-    setGeneralWarn("Register is not implemented");
+    const result = await requests.register({
+      username: username,
+      password: password,
+    });
+
+    if (result.message) {
+      setGeneralWarn(result.message);
+      return;
+    }
+
+    navigate("/");
   }
 
   return (
