@@ -17,7 +17,12 @@ export default function ChatCard({ onClick }: Props) {
       <div className="flex-1 flex">
         <div className="my-auto w-full">
           <div className="flex">
-            <div className="flex-1">@username</div>
+            <div className="text-ellipsis overflow-hidden max-w-48">
+              @username
+            </div>
+
+            <div className="flex-1" />
+
             <div className="text-neutral-400 text-sm">2024/10/06</div>
           </div>
 

@@ -41,7 +41,7 @@ export default function NewChat() {
             "hover:bg-rose-700 active:bg-rose-800"
           }
         >
-          <SendIcon className="rotate-[-25deg] -translate-y-0.5 size-full transition-all group-hover/btn:fill-neutral-300 group-active/btn:fill-neutral-400" />
+          <SendIcon className="rotate-[-25deg] -translate-y-0.5 translate-x-[1px] size-full transition-all group-hover/btn:fill-neutral-300 group-active/btn:fill-neutral-400" />
         </button>
       </div>
 

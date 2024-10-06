@@ -56,8 +56,6 @@ export default function ChatHeader({
         </button>
       </div>
 
-      <div className="hidden bg-dark-2 w-[2px] md:block" />
-
       <div className="flex-1 p-1 md:p-2 flex gap-1 md:gap-2">
         <button
           onClick={() => setExpanded(false)}
