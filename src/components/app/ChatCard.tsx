@@ -1,13 +1,16 @@
 import DefaultPfpIcon from "../../assets/default-pfp.svg?react";
 
-export default function NavigationCard() {
+type Props = {
+  onClick: () => void;
+};
+
+export default function ChatCard({ onClick }: Props) {
   return (
-    <div className="border-b-2 border-dark-1 p-2 flex gap-2 cursor-pointer hover:bg-dark-1.5 active:bg-dark-1 select-none md:p-3 md:gap-3">
-      <div
-        className={
-          "border-2 border-neutral-400 rounded-full size-12 " + "p-1.5"
-        }
-      >
+    <div
+      onClick={onClick}
+      className="border-b-2 border-dark-1 p-2 flex gap-2 cursor-pointer hover:bg-dark-1.5 active:bg-dark-1 select-none md:p-3 md:gap-3"
+    >
+      <div className="border-2 border-neutral-400 rounded-full size-12 flex-none p-1.5">
         <DefaultPfpIcon className="fill-neutral-400" />
       </div>
 
