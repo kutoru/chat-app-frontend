@@ -2,9 +2,20 @@ import { useEffect, useState } from "react";
 import ChatNavigation from "./ChatNavigation";
 import ChatContainer from "./ChatContainer";
 import ChatHeader from "./ChatHeader";
+import WindowDialog from "./WindowDialog";
+import Settings from "./Settings";
+import NewChat from "./NewChat";
+
+enum WindowType {
+  Hidden,
+  Settings,
+  AddChat,
+}
 
 export default function App() {
   const [expanded, setExpanded] = useState(false);
+  const [windowShown, setWindowShown] = useState(false);
+  const [windowType, setWindowType] = useState(WindowType.Hidden);
   const [isSmallScreen, setIsSmallScreen] = useState(true);
   const [headerHeight, setHeaderHeight] = useState(0);
 
@@ -36,13 +47,36 @@ export default function App() {
     }
   }
 
+  useEffect(() => {
+    if (!windowShown) {
+      setTimeout(() => {
+        setWindowType(WindowType.Hidden);
+      }, 150);
+    }
+  }, [windowShown]);
+
+  useEffect(() => {
+    if (windowType !== WindowType.Hidden) {
+      setWindowShown(true);
+    }
+  }, [windowType]);
+
   return (
     <>
+      <WindowDialog
+        shown={windowShown}
+        onCloseClick={() => setWindowShown(false)}
+      >
+        {windowType === WindowType.Settings && <Settings />}
+        {windowType === WindowType.AddChat && <NewChat />}
+      </WindowDialog>
+
       <ChatHeader
         expanded={expanded}
         setExpanded={setExpandedChecked}
         headerHeight={headerHeight}
         setHeaderHeight={setHeaderHeight}
+        onSettingsClick={() => setWindowType(WindowType.Settings)}
       />
 
       <div
@@ -54,6 +88,7 @@ export default function App() {
         <ChatNavigation
           headerHeight={headerHeight}
           setExpanded={setExpandedChecked}
+          onAddClick={() => setWindowType(WindowType.AddChat)}
         />
 
         <ChatContainer headerHeight={headerHeight} />

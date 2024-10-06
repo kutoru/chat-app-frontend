@@ -4,7 +4,7 @@ import App from "./components/app/App.tsx";
 import Login from "./components/login/Login.tsx";
 import "./index.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Error from "./components/error/error.tsx";
+import Error from "./components/error/Error.tsx";
 
 const router = createBrowserRouter([
   {

@@ -7,6 +7,7 @@ type Props = {
   setExpanded: (v: boolean) => void;
   headerHeight: number;
   setHeaderHeight: (v: number) => void;
+  onSettingsClick: () => void;
 };
 
 export default function ChatHeader({
@@ -14,6 +15,7 @@ export default function ChatHeader({
   setExpanded,
   headerHeight,
   setHeaderHeight,
+  onSettingsClick,
 }: Props) {
   const header = useRef<HTMLDivElement>(null);
 
@@ -37,13 +39,14 @@ export default function ChatHeader({
     <div
       ref={header}
       className={
-        "bg-dark-3 h-12 flex shadow-md border-rose-600 border-b-2 w-[200%] md:h-14 md:w-full " +
+        "bg-dark-3 h-12 flex shadow-md border-rose-600 border-b-2 w-[200%] md:h-14 md:w-full z-0 " +
         (expanded ? "-translate-x-1/2" : "")
       }
       style={{ transition: "transform 300ms cubic-bezier(0.4, 0, 0.2, 1)" }}
     >
       <div className="flex-1 p-1 md:p-2 md:w-96 md:flex-none">
         <button
+          onClick={onSettingsClick}
           className={
             "group/btn size-10 p-1 transition-all rounded-md " +
             "hover:bg-[#00000020] active:bg-[#00000030]"
