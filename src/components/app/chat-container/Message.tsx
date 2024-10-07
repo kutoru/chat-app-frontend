@@ -1,4 +1,4 @@
-import DefaultPfpIcon from "../../assets/default-pfp.svg?react";
+import DefaultPfpIcon from "../../../assets/default-pfp.svg?react";
 
 type Props = {
   fromSelf: boolean;
@@ -9,7 +9,7 @@ export default function Message({ fromSelf, images }: Props) {
   return (
     <div
       className={
-        "bg-dark-3 w-[90%] h-fit rounded-md lg:w-[85%] xl:w-[80%]" +
+        "bg-dark-3 shadow-sm w-[90%] h-fit rounded-md md:shadow-md lg:w-[85%] xl:w-[80%]" +
         (fromSelf ? " ms-[10%] lg:ms-[15%] xl:ms-[20%]" : "")
       }
     >

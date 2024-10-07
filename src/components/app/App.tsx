@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
-import ChatNavigation from "./ChatNavigation";
-import ChatContainer from "./ChatContainer";
+import ChatNavigation from "./chat-navigation/ChatNavigation";
+import ChatContainer from "./chat-container/ChatContainer";
 import ChatHeader from "./ChatHeader";
-import WindowDialog from "./WindowDialog";
-import Settings from "./Settings";
-import NewChat from "./NewChat";
+import WindowDialog from "./window-dialog/WindowDialog";
+import Settings from "./window-dialog/Settings";
+import NewChat from "./window-dialog/NewChat";
+import useWebsocket from "../../hooks/useWebsocket";
+import Room from "../../types/Room";
+import { useNavigate } from "react-router-dom";
+import Message from "../../types/Message";
+import ConnectionState from "../../types/ConnectionState";
 
 enum WindowType {
   Hidden,
@@ -18,6 +23,9 @@ export default function App() {
   const [windowType, setWindowType] = useState(WindowType.Hidden);
   const [isSmallScreen, setIsSmallScreen] = useState(true);
   const [headerHeight, setHeaderHeight] = useState(0);
+  //   const [connState, connError] = useWebsocket(onNewMessage);
+  const connState = ConnectionState.Connected;
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!isSmallScreen && expanded) {
@@ -61,6 +69,22 @@ export default function App() {
     }
   }, [windowType]);
 
+  //   useEffect(() => {
+  //     if (connError === "Invalid auth token") {
+  //       navigate("/login");
+  //     }
+  //   }, [connError]);
+
+  async function getRooms() {}
+
+  function onNewMessage(message: Message) {
+    console.log("onNewMessage", message);
+  }
+
+  function openRoom(room: Room) {
+    console.log("openRoom:", room);
+  }
+
   return (
     <>
       <WindowDialog
@@ -87,8 +111,11 @@ export default function App() {
       >
         <ChatNavigation
           headerHeight={headerHeight}
+          connState={connState}
           setExpanded={setExpandedChecked}
+          openRoom={openRoom}
           onAddClick={() => setWindowType(WindowType.AddChat)}
+          rooms={[]}
         />
 
         <ChatContainer headerHeight={headerHeight} />

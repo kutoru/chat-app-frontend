@@ -1,17 +1,67 @@
 import { useEffect, useState } from "react";
-import DefaultPfpIcon from "../../assets/default-pfp.svg?react";
-import EditIcon from "../../assets/edit.svg?react";
+import DefaultPfpIcon from "../../../assets/default-pfp.svg?react";
+import EditIcon from "../../../assets/edit.svg?react";
+import requests from "../../../requests";
+import User from "../../../types/User";
+import { formatDate } from "../../../utils";
+import global from "../../../global";
 
 export default function Settings() {
-  const [pfpError, setPfpError] = useState("");
+  const [userInfo, setUserInfo] = useState<User>();
+  const [pfpError, setPfpError] = useState<string>();
   const [password, setPassword] = useState("");
   const [repeatedPass, setRepeatedPass] = useState("");
-  const [passError, setPassError] = useState("");
+  const [passError, setPassError] = useState<string>();
 
   useEffect(() => {
-    // setPfpError("Could not upload the image");
-    // setPassError("Could not update the password");
+    reloadUserInfo();
   }, []);
+
+  async function reloadUserInfo() {
+    const result = await requests.userGet();
+    console.log(result);
+    if (!result.data) {
+      console.warn("Could not get user info");
+      return;
+    }
+
+    setUserInfo(result.data);
+  }
+
+  async function uploadImage() {
+    if (!userInfo) {
+      return;
+    }
+
+    setPfpError(undefined);
+
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.click();
+
+    const file: File | undefined = await new Promise((res, rej) => {
+      input.onchange = (e: Event) => {
+        res((e.target as HTMLInputElement | null)?.files?.[0]);
+      };
+    });
+
+    if (!file) {
+      return;
+    }
+
+    const fileResult = await requests.filesPfpPost(file);
+    if (fileResult.message) {
+      setPfpError(fileResult.message);
+      return;
+    }
+
+    setUserInfo({
+      username: userInfo.username,
+      created: userInfo.created,
+      profile_image: fileResult.data,
+    });
+  }
 
   return (
     <>
@@ -24,7 +74,10 @@ export default function Settings() {
       )}
 
       <div className="flex mb-4 gap-4 md:mb-5 md:gap-6">
-        <div className="relative group/pfp cursor-pointer">
+        <div
+          onClick={uploadImage}
+          className="relative group/pfp cursor-pointer"
+        >
           <button
             className={
               "bg-rose-600 absolute -ms-1 -mt-1 top-0 left-0 size-6 rounded-full p-1 transition-all md:size-7 md:-ms-1.5 md:-mt-1.5" +
@@ -39,16 +92,30 @@ export default function Settings() {
             />
           </button>
 
-          <div className="border-2 border-neutral-400 rounded-full size-14 flex-none p-1.5 md:size-16">
-            <DefaultPfpIcon className="fill-neutral-400" />
+          <div
+            className={
+              "border-2 border-neutral-400 rounded-full size-14 flex-none md:size-16" +
+              (!userInfo?.profile_image ? " p-1.5" : "")
+            }
+          >
+            {!userInfo?.profile_image ? (
+              <DefaultPfpIcon className="fill-neutral-400" />
+            ) : (
+              <img
+                className="rounded-full object-cover"
+                src={global.API_URL + "/files/" + userInfo.profile_image}
+              />
+            )}
           </div>
         </div>
 
         <div className="flex-1 flex">
           <div className="my-auto">
-            <div className="md:text-xl">@username</div>
+            <div className="md:text-xl">
+              @{userInfo ? userInfo.username : " -"}
+            </div>
             <div className="text-sm text-neutral-400 md:text-base">
-              Account created: 2024/10/06
+              Account created: {userInfo ? formatDate(userInfo.created) : "-"}
             </div>
           </div>
         </div>

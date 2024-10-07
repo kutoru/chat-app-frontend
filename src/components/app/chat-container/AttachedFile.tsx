@@ -1,4 +1,4 @@
-import CloseIcon from "../../assets/close.svg?react";
+import CloseIcon from "../../../assets/close.svg?react";
 
 export default function AttachedFile() {
   return (

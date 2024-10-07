@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import SendIcon from "../../assets/send.svg?react";
-import AddIcon from "../../assets/add.svg?react";
+import SendIcon from "../../../assets/send.svg?react";
+import AddIcon from "../../../assets/add.svg?react";
 
 export default function NewChat() {
   const [userError, setUserError] = useState<string | undefined>();

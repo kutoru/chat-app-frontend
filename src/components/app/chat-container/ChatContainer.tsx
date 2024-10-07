@@ -1,6 +1,6 @@
 import { useState } from "react";
-import SendIcon from "../../assets/send.svg?react";
-import AttachmentIcon from "../../assets/attachment.svg?react";
+import SendIcon from "../../../assets/send.svg?react";
+import AttachmentIcon from "../../../assets/attachment.svg?react";
 import AttachedFile from "./AttachedFile";
 import Message from "./Message";
 import SystemMessage from "./SystemMessage";
