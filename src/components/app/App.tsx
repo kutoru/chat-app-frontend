@@ -5,7 +5,6 @@ import ChatHeader from "./ChatHeader";
 import WindowDialog from "./window-dialog/WindowDialog";
 import Settings from "./window-dialog/Settings";
 import NewChat from "./window-dialog/NewChat";
-import useWebsocket from "../../hooks/useWebsocket";
 import { useNavigate } from "react-router-dom";
 import Message from "../../types/Message";
 import ConnectionState from "../../types/ConnectionState";
@@ -13,6 +12,8 @@ import requests from "../../requests";
 import User from "../../types/User";
 import RoomPreview from "../../types/RoomPreview";
 import SystemMessage from "../../types/SystemMessage";
+import PendingMessage from "../../types/PendingMessage";
+import global from "../../global";
 
 enum WindowType {
   Hidden,
@@ -21,7 +22,9 @@ enum WindowType {
 }
 
 export default function App() {
-  //   const [connState, connError] = useWebsocket(onNewMessage);
+  // websocket
+  const [wsError, setWsError] = useState<string>();
+  const [ws, setWs] = useState<WebSocket>();
 
   // page layout
   const [expanded, setExpanded] = useState(false);
@@ -38,13 +41,16 @@ export default function App() {
 
   // ChatContainer
   const [text, setText] = useState("");
-  const [files, setFiles] = useState<any[]>([]);
-  const [messages, setMessages] = useState<(Message | SystemMessage)[]>([]);
+  const [files, setFiles] = useState<File[]>([]);
+  const [messages, setMessages] = useState<
+    (Message | SystemMessage | PendingMessage)[]
+  >([]);
 
   // mixed
   const [currRoom, setCurrRoom] = useState<RoomPreview>();
   const [focusRoomId, setFocusRoomId] = useState<number>();
   const navigate = useNavigate();
+  const pendingFiles = new Map<number, File[]>();
 
   // initial render
   useEffect(() => {
@@ -100,6 +106,35 @@ export default function App() {
     return () => clearTimeout(timeoutId);
   }, [focusRoomId, setFocusRoomId]);
 
+  // websocket initialization
+  useEffect(() => {
+    if (!ws) {
+      setWs(new WebSocket(global.WS_URL));
+      return;
+    }
+
+    ws.onopen = () => {
+      ws?.send("ack");
+    };
+
+    ws.onmessage = (msg) => {
+      console.log("onmessage", msg);
+
+      try {
+        const chatMessage = JSON.parse(msg.data);
+        onNewMessage(chatMessage);
+
+        const files = pendingFiles.get(chatMessage.temp_id);
+        pendingFiles.delete(chatMessage.temp_id);
+        if (!files) {
+          return;
+        }
+
+        // TODO: upload the files here using the chatMessage.id
+      } catch (error) {}
+    };
+  }, [ws, currRoom, messages, rooms]);
+
   function openRoom(room: RoomPreview) {
     if (currRoom !== room) {
       clearChat();
@@ -108,9 +143,13 @@ export default function App() {
   }
 
   function clearChat() {
+    clearInput();
+    setMessages([]);
+  }
+
+  function clearInput() {
     setText("");
     setFiles([]);
-    setMessages([]);
   }
 
   function updateIsSmallScreen() {
@@ -156,6 +195,71 @@ export default function App() {
 
   function onNewMessage(message: Message) {
     console.log("onNewMessage", message);
+    // add message to the chat if it is currently open
+
+    if (currRoom && message.room_id === currRoom.id) {
+      const replaceIndex = messages.findIndex(
+        (v: any) => v.temp_id === message.temp_id,
+      );
+
+      if (replaceIndex === -1) {
+        setMessages([message, ...messages]);
+      } else {
+        messages[replaceIndex] = message;
+        setMessages([...messages]);
+      }
+    }
+
+    // update the last message on the navigation
+
+    for (let i = 0; i < rooms.length; i++) {
+      if (message.room_id === rooms[i].id) {
+        rooms[i].message_created = message.created;
+        rooms[i].message_text = message.text;
+        setRooms([...rooms]);
+        return;
+      }
+    }
+
+    // if a chat wasn't found, fetch it
+
+    requests.getRoomById(message.room_id).then((res) => {
+      if (!res.data) {
+        console.warn("Could not get a room:", res);
+        return;
+      }
+
+      setRooms([res.data, ...rooms]);
+    });
+  }
+
+  function sendMessage(newMessage: PendingMessage) {
+    if (!ws) {
+      setWsError("Connection is not available");
+      return;
+    }
+
+    pendingFiles.set(newMessage.temp_id, newMessage.files);
+    newMessage.files = [];
+
+    ws.send(JSON.stringify(newMessage));
+  }
+
+  function handleMessage() {
+    if (!currRoom) {
+      return;
+    }
+
+    const pendingMessage = {
+      temp_id: Math.floor(Math.random() * 1_000_000_000),
+      room_id: currRoom.id,
+      text: text,
+      files: files,
+    };
+
+    sendMessage(pendingMessage);
+    setMessages([pendingMessage, ...messages]);
+    clearInput();
   }
 
   return (
@@ -205,6 +309,8 @@ export default function App() {
           setFiles={setFiles}
           messages={messages}
           setMessages={setMessages}
+          sendMessage={handleMessage}
+          messageError={wsError}
         />
       </div>
     </>

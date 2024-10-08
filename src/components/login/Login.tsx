@@ -20,7 +20,7 @@ export default function Login() {
 
   useEffect(() => {
     if (searchParams.get("m") === "unauthorized") {
-      setGeneralWarn("Your session has expired. Log in again");
+      setGeneralWarn("Your session is invalid. Log in with your credentials");
     }
   }, [searchParams]);
 
