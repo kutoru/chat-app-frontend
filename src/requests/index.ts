@@ -1,14 +1,20 @@
 import global from "../global";
-import LoginBody from "../types/LoginBody";
 import ResponseBody from "../types/ResponseBody";
+import Room from "../types/Room";
 import RoomPreview from "../types/RoomPreview";
 import User from "../types/User";
 
-async function login(body: LoginBody): Promise<ResponseBody<void>> {
+async function login(body: {
+  username: string;
+  password: string;
+}): Promise<ResponseBody<void>> {
   return await callApi("/login", "post", body);
 }
 
-async function register(body: LoginBody): Promise<ResponseBody<void>> {
+async function register(body: {
+  username: string;
+  password: string;
+}): Promise<ResponseBody<void>> {
   return await callApi("/register", "post", body);
 }
 
@@ -37,6 +43,12 @@ async function filesPfpPost(file: File) {
     });
 
   return result;
+}
+
+async function roomsDirectPost(body: {
+  username: string;
+}): Promise<ResponseBody<Room>> {
+  return await callApi("/rooms/direct", "post", body);
 }
 
 async function getRooms(): Promise<ResponseBody<RoomPreview[]>> {
@@ -68,4 +80,5 @@ export default {
   register,
   userGet,
   filesPfpPost,
+  roomsDirectPost,
 };

@@ -44,7 +44,7 @@ export default function ChatNavigation({
   }
 
   return (
-    <div className="relative bg-dark-2 h-fit flex-1 md:w-96 md:flex-none">
+    <div className="relative bg-dark-2 h-fit flex-1 md:w-96 md:flex-none md:shadow-md">
       {connState === ConnectionState.Connected && rooms.length > 0 ? (
         <div
           className="flex flex-col overflow-y-auto pb-[4.25rem] scrollbar "

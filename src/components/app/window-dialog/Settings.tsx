@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import DefaultPfpIcon from "../../../assets/default-pfp.svg?react";
 import EditIcon from "../../../assets/edit.svg?react";
 import requests from "../../../requests";
@@ -6,27 +6,16 @@ import User from "../../../types/User";
 import { formatDate } from "../../../utils";
 import global from "../../../global";
 
-export default function Settings() {
-  const [userInfo, setUserInfo] = useState<User>();
+type Props = {
+  userInfo: User | undefined;
+  setUserInfo: (v: User) => void;
+};
+
+export default function Settings({ userInfo, setUserInfo }: Props) {
   const [pfpError, setPfpError] = useState<string>();
   const [password, setPassword] = useState("");
   const [repeatedPass, setRepeatedPass] = useState("");
   const [passError, setPassError] = useState<string>();
-
-  useEffect(() => {
-    reloadUserInfo();
-  }, []);
-
-  async function reloadUserInfo() {
-    const result = await requests.userGet();
-    console.log(result);
-    if (!result.data) {
-      console.warn("Could not get user info");
-      return;
-    }
-
-    setUserInfo(result.data);
-  }
 
   async function uploadImage() {
     if (!userInfo) {
@@ -40,9 +29,9 @@ export default function Settings() {
     input.accept = "image/*";
     input.click();
 
-    const file: File | undefined = await new Promise((res, rej) => {
+    const file: File | undefined = await new Promise((resolve) => {
       input.onchange = (e: Event) => {
-        res((e.target as HTMLInputElement | null)?.files?.[0]);
+        resolve((e.target as HTMLInputElement | null)?.files?.[0]);
       };
     });
 
@@ -61,6 +50,10 @@ export default function Settings() {
       created: userInfo.created,
       profile_image: fileResult.data,
     });
+  }
+
+  async function changePassword() {
+    setPassError("Not implemented");
   }
 
   return (
@@ -157,6 +150,7 @@ export default function Settings() {
         <div className="flex-1" />
 
         <button
+          onClick={changePassword}
           className={
             "bg-rose-600 py-2 px-4 rounded-md transition-all " +
             "hover:bg-rose-700 hover:text-neutral-300 active:bg-rose-800 active:text-neutral-400"

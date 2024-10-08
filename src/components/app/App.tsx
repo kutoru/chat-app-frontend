@@ -10,6 +10,8 @@ import Room from "../../types/Room";
 import { useNavigate } from "react-router-dom";
 import Message from "../../types/Message";
 import ConnectionState from "../../types/ConnectionState";
+import requests from "../../requests";
+import User from "../../types/User";
 
 enum WindowType {
   Hidden,
@@ -26,6 +28,9 @@ export default function App() {
   //   const [connState, connError] = useWebsocket(onNewMessage);
   const connState = ConnectionState.Connected;
   const navigate = useNavigate();
+
+  const [userInfo, setUserInfo] = useState<User>();
+  const [focusRoomId, setFocusRoomId] = useState<number>();
 
   useEffect(() => {
     if (!isSmallScreen && expanded) {
@@ -75,6 +80,17 @@ export default function App() {
   //     }
   //   }, [connError]);
 
+  async function onSettingsClick() {
+    const userInfoRes = await requests.userGet();
+    if (!userInfoRes.data) {
+      console.warn("Could not get user info");
+      return;
+    }
+
+    setUserInfo(userInfoRes.data);
+    setWindowType(WindowType.Settings);
+  }
+
   async function getRooms() {}
 
   function onNewMessage(message: Message) {
@@ -91,8 +107,12 @@ export default function App() {
         shown={windowShown}
         onCloseClick={() => setWindowShown(false)}
       >
-        {windowType === WindowType.Settings && <Settings />}
-        {windowType === WindowType.AddChat && <NewChat />}
+        {windowType === WindowType.Settings && (
+          <Settings userInfo={userInfo} setUserInfo={setUserInfo} />
+        )}
+        {windowType === WindowType.AddChat && (
+          <NewChat setFocusRoomId={setFocusRoomId} />
+        )}
       </WindowDialog>
 
       <ChatHeader
@@ -100,7 +120,7 @@ export default function App() {
         setExpanded={setExpandedChecked}
         headerHeight={headerHeight}
         setHeaderHeight={setHeaderHeight}
-        onSettingsClick={() => setWindowType(WindowType.Settings)}
+        onSettingsClick={onSettingsClick}
       />
 
       <div

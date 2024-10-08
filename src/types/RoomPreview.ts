@@ -1,8 +1,8 @@
-import Message from "./Message";
 import Room from "./Room";
 
 type RoomPreview = Room & {
-  last_message: Message;
+  message_text: string;
+  message_created: number;
 };
 
 export default RoomPreview;

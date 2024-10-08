@@ -1,23 +1,54 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import SendIcon from "../../../assets/send.svg?react";
 import AddIcon from "../../../assets/add.svg?react";
+import requests from "../../../requests";
 
-export default function NewChat() {
+type Props = {
+  setFocusRoomId: (v: number | undefined) => void;
+};
+
+export default function NewChat({ setFocusRoomId }: Props) {
   const [userError, setUserError] = useState<string | undefined>();
+  const [userSuccess, setUserSuccess] = useState<string | undefined>();
   const [username, setUsername] = useState("");
   const [groupError, setGroupError] = useState<string | undefined>();
   const [groupName, setGroupName] = useState("");
 
-  useEffect(() => {
-    // setUserError("Such user does not exist");
-    // setGroupError("Group name cannot be empty");
-  }, []);
+  async function startNewChat() {
+    setUserError(undefined);
+    setUserSuccess(undefined);
+
+    if (!username.length) {
+      setUserError("Enter a username");
+      return;
+    }
+
+    const result = await requests.roomsDirectPost({ username: username });
+    console.log(result);
+    if (result.message || !result.data) {
+      setUserError(result.message);
+      return;
+    }
+
+    setFocusRoomId(result.data.id);
+    setUserSuccess("The chat has been started");
+  }
+
+  async function createNewGroup() {
+    setGroupError("Not implemented");
+  }
 
   return (
     <>
       <div className="text-2xl text-center mb-4 md:text-3xl md:mb-5">
         Start a new chat
       </div>
+
+      {userSuccess && (
+        <div className="text-green-400 mb-4 text-center md:mb-5">
+          {userSuccess}
+        </div>
+      )}
 
       {userError && (
         <div className="text-red-500 mb-4 text-center md:mb-5">{userError}</div>
@@ -36,6 +67,7 @@ export default function NewChat() {
         />
 
         <button
+          onClick={startNewChat}
           className={
             "group/btn size-10 p-1 transition-all rounded-md bg-rose-600 flex-none " +
             "hover:bg-rose-700 active:bg-rose-800"
@@ -70,6 +102,7 @@ export default function NewChat() {
         />
 
         <button
+          onClick={createNewGroup}
           className={
             "group/btn size-10 p-1 transition-all rounded-md bg-rose-600 flex-none " +
             "hover:bg-rose-700 active:bg-rose-800"
