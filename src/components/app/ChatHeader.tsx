@@ -1,6 +1,9 @@
 import SettingsIcon from "../../assets/settings.svg?react";
 import BackIcon from "../../assets/back.svg?react";
 import { useEffect, useRef } from "react";
+import RoomPreview from "../../types/RoomPreview";
+import global from "../../global";
+import DefaultPfpIcon from "../../assets/default-pfp.svg?react";
 
 type Props = {
   expanded: boolean;
@@ -8,6 +11,7 @@ type Props = {
   headerHeight: number;
   setHeaderHeight: (v: number) => void;
   onSettingsClick: () => void;
+  currRoom: RoomPreview | undefined;
 };
 
 export default function ChatHeader({
@@ -16,6 +20,7 @@ export default function ChatHeader({
   headerHeight,
   setHeaderHeight,
   onSettingsClick,
+  currRoom,
 }: Props) {
   const header = useRef<HTMLDivElement>(null);
 
@@ -56,7 +61,7 @@ export default function ChatHeader({
         </button>
       </div>
 
-      <div className="flex-1 p-1 md:p-2 flex gap-1 md:gap-2">
+      <div className="flex-1 p-1 md:p-2 flex gap-2">
         <button
           onClick={() => setExpanded(false)}
           className={
@@ -67,9 +72,30 @@ export default function ChatHeader({
           <BackIcon className="size-full transition-all group-hover/btn:fill-neutral-300 group-active/btn:fill-neutral-400" />
         </button>
 
-        <div className="text-lg my-auto line-clamp-1">
-          Profile pic, chat name
-        </div>
+        {currRoom && (
+          <>
+            <div
+              className={
+                "border-2 border-neutral-400 rounded-full size-[calc(2.5rem-2px)] flex-none" +
+                (!currRoom.cover_image ? " p-1" : "")
+              }
+            >
+              {!currRoom.cover_image ? (
+                <DefaultPfpIcon className="fill-neutral-400" />
+              ) : (
+                <img
+                  className="rounded-full object-cover"
+                  src={global.API_URL + "/files/" + currRoom.cover_image}
+                />
+              )}
+            </div>
+
+            <div className="text-lg my-auto line-clamp-1">
+              {currRoom.type === "direct" && "@"}
+              {currRoom.name}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

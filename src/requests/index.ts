@@ -1,4 +1,5 @@
 import global from "../global";
+import Message from "../types/Message";
 import ResponseBody from "../types/ResponseBody";
 import Room from "../types/Room";
 import RoomPreview from "../types/RoomPreview";
@@ -61,6 +62,18 @@ async function roomsDirectPost(body: {
   return await callApi("/rooms/direct", "post", body);
 }
 
+async function getMessages(
+  roomId: number,
+  abortSignal?: AbortSignal,
+): Promise<ResponseBody<Message[]>> {
+  return await callApi(
+    `/rooms/${roomId}/messages`,
+    "get",
+    undefined,
+    abortSignal,
+  );
+}
+
 async function callApi<RequestBody, ResponseData>(
   path: string,
   method: "get" | "post",
@@ -95,4 +108,5 @@ export default {
   getRooms,
   getRoomById,
   roomsDirectPost,
+  getMessages,
 };

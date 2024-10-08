@@ -1,7 +1,6 @@
 import AddIcon from "../../../assets/add.svg?react";
 import SpinnerIcon from "../../../assets/spinner.svg?react";
 import ConnectionState from "../../../types/ConnectionState";
-import Room from "../../../types/Room";
 import RoomPreview from "../../../types/RoomPreview";
 import ChatCard from "./ChatCard";
 
@@ -9,7 +8,7 @@ type Props = {
   headerHeight: number;
   connState: ConnectionState;
   setExpanded: (v: boolean) => void;
-  openRoom: (r: Room) => void;
+  openRoom: (r: RoomPreview) => void;
   onAddClick: () => void;
   rooms: RoomPreview[];
 };

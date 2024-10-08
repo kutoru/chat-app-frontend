@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LoginInput from "./LoginInput";
 import requests from "../../requests";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
@@ -15,6 +15,14 @@ export default function Login() {
   const [passwordWarn, setPasswordWarn] = useState("");
   const [repeatedPassWarn, setRepeatedPassWarn] = useState("");
   const [generalWarn, setGeneralWarn] = useState("");
+
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("m") === "unauthorized") {
+      setGeneralWarn("Your session has expired. Log in again");
+    }
+  }, [searchParams]);
 
   function toggleRegister() {
     setUsernameWarn("");
