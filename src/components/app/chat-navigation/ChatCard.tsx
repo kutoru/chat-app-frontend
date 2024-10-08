@@ -41,12 +41,12 @@ export default function ChatCard({ onClick, room }: Props) {
             <div className="flex-1" />
 
             <div className="text-neutral-400 text-sm">
-              {formatDate(room.last_message.created)}
+              {formatDate(room.message_created)}
             </div>
           </div>
 
           <div className="line-clamp-1 text-neutral-300">
-            {room.last_message.text}
+            {room.message_text}
           </div>
         </div>
       </div>

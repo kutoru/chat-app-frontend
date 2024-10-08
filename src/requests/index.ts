@@ -45,31 +45,43 @@ async function filesPfpPost(file: File) {
   return result;
 }
 
+async function getRooms(
+  abortSignal?: AbortSignal,
+): Promise<ResponseBody<RoomPreview[]>> {
+  return await callApi("/rooms", "get", undefined, abortSignal);
+}
+
+async function getRoomById(id: number): Promise<ResponseBody<RoomPreview>> {
+  return await callApi("/rooms/" + id, "get");
+}
+
 async function roomsDirectPost(body: {
   username: string;
 }): Promise<ResponseBody<Room>> {
   return await callApi("/rooms/direct", "post", body);
 }
 
-async function getRooms(): Promise<ResponseBody<RoomPreview[]>> {
-  return await callApi("/rooms", "get");
-}
-
 async function callApi<RequestBody, ResponseData>(
   path: string,
-  method: "get" | "post" | "patch" | "delete",
+  method: "get" | "post",
   body?: RequestBody,
+  abortSignal?: AbortSignal,
 ): Promise<ResponseBody<ResponseData>> {
   return await fetch(global.API_URL + path, {
     method: method,
     headers: { "content-type": "application/json" },
     credentials: "include",
     body: body ? JSON.stringify(body) : undefined,
+    signal: abortSignal,
   })
     .then((response) => {
       return response.json();
     })
     .catch((error) => {
+      if (error.message === "The operation was aborted. ") {
+        return { message: "Client error" };
+      }
+
       console.warn(error);
       return { message: "Server error" };
     });
@@ -80,5 +92,7 @@ export default {
   register,
   userGet,
   filesPfpPost,
+  getRooms,
+  getRoomById,
   roomsDirectPost,
 };

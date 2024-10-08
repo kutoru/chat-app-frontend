@@ -12,6 +12,7 @@ import Message from "../../types/Message";
 import ConnectionState from "../../types/ConnectionState";
 import requests from "../../requests";
 import User from "../../types/User";
+import RoomPreview from "../../types/RoomPreview";
 
 enum WindowType {
   Hidden,
@@ -29,8 +30,17 @@ export default function App() {
   const connState = ConnectionState.Connected;
   const navigate = useNavigate();
 
+  const [rooms, setRooms] = useState<RoomPreview[]>([]);
   const [userInfo, setUserInfo] = useState<User>();
   const [focusRoomId, setFocusRoomId] = useState<number>();
+
+  useEffect(() => {
+    onResize();
+
+    const abortController = new AbortController();
+    getRooms(abortController.signal);
+    return () => abortController.abort();
+  }, []);
 
   useEffect(() => {
     if (!isSmallScreen && expanded) {
@@ -42,10 +52,6 @@ export default function App() {
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, [isSmallScreen, setIsSmallScreen]);
-
-  useEffect(() => {
-    onResize();
-  }, []);
 
   function onResize() {
     const currState = window.innerWidth < 768;
@@ -91,7 +97,21 @@ export default function App() {
     setWindowType(WindowType.Settings);
   }
 
-  async function getRooms() {}
+  async function getRooms(abortSignal?: AbortSignal) {
+    const result = await requests.getRooms(abortSignal);
+    console.log(result);
+    if (result.message || !result.data) {
+      if (result.message === "Invalid auth token") {
+        navigate("/login");
+      } else {
+        // TODO: show the error to the user
+      }
+
+      return;
+    }
+
+    setRooms(result.data);
+  }
 
   function onNewMessage(message: Message) {
     console.log("onNewMessage", message);
@@ -135,7 +155,7 @@ export default function App() {
           setExpanded={setExpandedChecked}
           openRoom={openRoom}
           onAddClick={() => setWindowType(WindowType.AddChat)}
-          rooms={[]}
+          rooms={rooms}
         />
 
         <ChatContainer headerHeight={headerHeight} />
