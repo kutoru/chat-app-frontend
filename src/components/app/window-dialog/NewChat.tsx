@@ -11,7 +11,9 @@ export default function NewChat({ setFocusRoomId }: Props) {
   const [userError, setUserError] = useState<string | undefined>();
   const [userSuccess, setUserSuccess] = useState<string | undefined>();
   const [username, setUsername] = useState("");
+
   const [groupError, setGroupError] = useState<string | undefined>();
+  const [groupSuccess, setGroupSuccess] = useState<string | undefined>();
   const [groupName, setGroupName] = useState("");
 
   async function startNewChat() {
@@ -24,18 +26,34 @@ export default function NewChat({ setFocusRoomId }: Props) {
     }
 
     const result = await requests.roomsDirectPost({ username: username });
-    console.log(result);
-    if (result.message || !result.data) {
+    if (!result.data) {
       setUserError(result.message);
       return;
     }
 
     setFocusRoomId(result.data.id);
     setUserSuccess("The chat has been started");
+    setUsername("");
   }
 
   async function createNewGroup() {
-    setGroupError("Not implemented");
+    setGroupError(undefined);
+    setGroupSuccess(undefined);
+
+    if (groupName.length < 4) {
+      setGroupError("Group name is too short");
+      return;
+    }
+
+    const result = await requests.roomsGroupPost({ groupName: groupName });
+    if (!result.data) {
+      setGroupError(result.message);
+      return;
+    }
+
+    setFocusRoomId(result.data.id);
+    setGroupSuccess("The group has been created");
+    setGroupName("");
   }
 
   return (
@@ -82,6 +100,12 @@ export default function NewChat({ setFocusRoomId }: Props) {
       <div className="text-2xl text-center mb-4 md:text-3xl md:mb-5">
         Or create a group
       </div>
+
+      {groupSuccess && (
+        <div className="text-green-400 mb-4 text-center md:mb-5">
+          {groupSuccess}
+        </div>
+      )}
 
       {groupError && (
         <div className="text-red-500 mb-4 text-center md:mb-5">
