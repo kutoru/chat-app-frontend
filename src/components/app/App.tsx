@@ -35,6 +35,7 @@ export default function App() {
 
   // ChatNavigation
   const [rooms, setRooms] = useState<RoomPreview[]>([]);
+  const [chatNavState, setChatNavState] = useState(ConnectionState.Loading);
 
   // WindowDialog
   const [windowShown, setWindowShown] = useState(false);
@@ -185,11 +186,13 @@ export default function App() {
       } else if (result.message !== "Aborted") {
         // TODO: show the error to the user
         console.warn("Could not get user rooms", result);
+        setChatNavState(ConnectionState.Disconnected);
       }
 
       return;
     }
 
+    setChatNavState(ConnectionState.Connected);
     setRooms(result.data);
   }
 
@@ -333,7 +336,7 @@ export default function App() {
       >
         <ChatNavigation
           headerHeight={headerHeight}
-          connState={ConnectionState.Connected} // TODO: delete or refactor this
+          connState={chatNavState}
           setExpanded={setExpandedChecked}
           openRoom={openRoom}
           onAddClick={() => setWindowType(WindowType.AddChat)}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import SendIcon from "../../../assets/send.svg?react";
 import AttachmentIcon from "../../../assets/attachment.svg?react";
 import AttachedFile from "./AttachedFile";
@@ -158,6 +158,19 @@ export default function ChatContainer({
     return elements;
   }
 
+  function onInputKeyDown(e: React.KeyboardEvent) {
+    if (e.code === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+    }
+  }
+
+  function onInputKeyUp(e: React.KeyboardEvent) {
+    if (e.code === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
   return (
     <div
       className="bg-dark-1 flex-1 flex"
@@ -183,6 +196,8 @@ export default function ChatContainer({
               placeholder="Message text"
               value={text}
               onInput={(e) => setText((e.target as HTMLInputElement).value)}
+              onKeyDown={onInputKeyDown}
+              onKeyUp={onInputKeyUp}
               className={
                 "flex-1 bg-dark-3 p-1 rounded-md resize-none scrollbar" +
                 " focus:outline focus:outline-2 focus:outline-rose-600" +
