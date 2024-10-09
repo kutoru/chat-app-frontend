@@ -10,6 +10,7 @@ import requests from "../../../requests";
 import SystemMessage from "../../../types/SystemMessage";
 import PendingMessage from "../../../types/PendingMessage";
 import PendingMessageContainer from "./PendingMessageContainer";
+import { getRandomId } from "../../../utils";
 
 type AllMessages = Message | SystemMessage | PendingMessage;
 
@@ -59,19 +60,22 @@ export default function ChatContainer({
 
     const result = await requests.getMessages(room.id, abortSignal);
     if (!result.data) {
-      showError("Could not get messages. Reason: " + result.message);
+      if (result.message !== "Aborted") {
+        showError("Could not get messages. Reason: " + result.message);
+      }
+
       return;
     }
 
     setMessages(result.data);
   }
 
-  function isSystemMessage(msg: AllMessages): msg is SystemMessage {
-    return !(msg as any).username;
+  function isMessage(msg: AllMessages): msg is Message {
+    return !!(msg as any).username && !!(msg as any).id;
   }
 
-  function isPendingMessage(msg: AllMessages): msg is PendingMessage {
-    return !!(msg as any).files;
+  function isSystemMessage(msg: AllMessages): msg is SystemMessage {
+    return !(msg as any).username && !(msg as any).temp_id;
   }
 
   function mapMessages() {
@@ -80,19 +84,22 @@ export default function ChatContainer({
     for (let i = 0; i < messages.length; i++) {
       const msg = messages[i];
 
-      if (isPendingMessage(msg)) {
-        msgElements.push(
-          <PendingMessageContainer key={msg.temp_id} message={msg} />,
-        );
+      if (isMessage(msg)) {
+        msgElements.push(<MessageContainer key={msg.id} message={msg} />);
       } else if (isSystemMessage(msg)) {
         msgElements.push(
           <SystemMessageContainer
-            key={msg.id || Math.random()}
+            key={msg.id || getRandomId()}
             message={msg}
           />,
         );
       } else {
-        msgElements.push(<MessageContainer key={msg.id} message={msg} />);
+        msgElements.push(
+          <PendingMessageContainer
+            key={msg.temp_id || getRandomId()}
+            message={msg}
+          />,
+        );
       }
     }
 

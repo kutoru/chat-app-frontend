@@ -1,4 +1,4 @@
-import File from "./File";
+import FileInfo from "./FileInfo";
 
 type Message = {
   id: number;
@@ -9,7 +9,7 @@ type Message = {
   from_self: boolean;
   text: string;
   created: number;
-  files?: File[];
+  files?: FileInfo[];
 };
 
 export default Message;

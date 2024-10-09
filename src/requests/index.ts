@@ -1,4 +1,5 @@
 import global from "../global";
+import FileInfo from "../types/FileInfo";
 import Message from "../types/Message";
 import ResponseBody from "../types/ResponseBody";
 import Room from "../types/Room";
@@ -23,24 +24,46 @@ async function userGet(): Promise<ResponseBody<User>> {
   return await callApi("/users", "get");
 }
 
-async function filesPfpPost(file: File) {
+async function filesPfpPost(file: File): Promise<ResponseBody<string>> {
   const formData = new FormData();
   formData.append("file", file);
 
-  const result: ResponseBody<string> = await fetch(
-    global.API_URL + "/files/pfp",
-    {
-      method: "post",
-      credentials: "include",
-      body: formData,
-    },
-  )
+  const result = await fetch(global.API_URL + "/files/pfp", {
+    method: "post",
+    credentials: "include",
+    body: formData,
+  })
     .then((response) => {
       return response.json();
     })
     .catch((error) => {
       console.warn(error);
       return { message: "Server error" };
+    });
+
+  return result;
+}
+
+async function filesMessagePost(
+  messageId: number,
+  files: File[],
+): Promise<ResponseBody<FileInfo[]>> {
+  const formData = new FormData();
+  for (let i = 0; i < files.length; i++) {
+    formData.append("files", files[i]);
+  }
+
+  const result = await fetch(`${global.API_URL}/files/message/${messageId}`, {
+    method: "post",
+    credentials: "include",
+    body: formData,
+  })
+    .then((response) => {
+      return response.json();
+    })
+    .catch((error) => {
+      console.warn(error);
+      return { message: "Unknown error" };
     });
 
   return result;
@@ -92,7 +115,7 @@ async function callApi<RequestBody, ResponseData>(
     })
     .catch((error) => {
       if (error.message === "The operation was aborted. ") {
-        return { message: "Client error" };
+        return { message: "Aborted" };
       }
 
       console.warn(error);
@@ -105,6 +128,7 @@ export default {
   register,
   userGet,
   filesPfpPost,
+  filesMessagePost,
   getRooms,
   getRoomById,
   roomsDirectPost,

@@ -14,6 +14,8 @@ import RoomPreview from "../../types/RoomPreview";
 import SystemMessage from "../../types/SystemMessage";
 import PendingMessage from "../../types/PendingMessage";
 import global from "../../global";
+import { getRandomId } from "../../utils";
+import FileInfo from "../../types/FileInfo";
 
 enum WindowType {
   Hidden,
@@ -40,8 +42,8 @@ export default function App() {
   const [userInfo, setUserInfo] = useState<User>();
 
   // ChatContainer
-  const [text, setText] = useState("");
-  const [files, setFiles] = useState<File[]>([]);
+  const [messageText, setMessageText] = useState("");
+  const [messageFiles, setMessageFiles] = useState<File[]>([]);
   const [messages, setMessages] = useState<
     (Message | SystemMessage | PendingMessage)[]
   >([]);
@@ -49,8 +51,8 @@ export default function App() {
   // mixed
   const [currRoom, setCurrRoom] = useState<RoomPreview>();
   const [focusRoomId, setFocusRoomId] = useState<number>();
+  const [pendingFiles] = useState(new Map<number, File[]>());
   const navigate = useNavigate();
-  const pendingFiles = new Map<number, File[]>();
 
   // initial render
   useEffect(() => {
@@ -118,20 +120,18 @@ export default function App() {
     };
 
     ws.onmessage = (msg) => {
-      console.log("onmessage", msg);
-
       try {
-        const chatMessage = JSON.parse(msg.data);
-        onNewMessage(chatMessage);
+        const result = JSON.parse(msg.data);
+        console.log("onmessage", result);
 
-        const files = pendingFiles.get(chatMessage.temp_id);
-        pendingFiles.delete(chatMessage.temp_id);
-        if (!files) {
-          return;
+        if (result.type === "message") {
+          onNewMessage(result.data);
+        } else if (result.type === "files") {
+          onNewFiles(result.data);
         }
-
-        // TODO: upload the files here using the chatMessage.id
-      } catch (error) {}
+      } catch (error) {
+        console.warn("Received an invalid message data:", msg);
+      }
     };
   }, [ws, currRoom, messages, rooms]);
 
@@ -148,8 +148,8 @@ export default function App() {
   }
 
   function clearInput() {
-    setText("");
-    setFiles([]);
+    setMessageText("");
+    setMessageFiles([]);
   }
 
   function updateIsSmallScreen() {
@@ -182,7 +182,7 @@ export default function App() {
     if (!result.data) {
       if (result.message === "Invalid auth token") {
         navigate("/login?m=unauthorized");
-      } else {
+      } else if (result.message !== "Aborted") {
         // TODO: show the error to the user
         console.warn("Could not get user rooms", result);
       }
@@ -194,7 +194,12 @@ export default function App() {
   }
 
   function onNewMessage(message: Message) {
-    console.log("onNewMessage", message);
+    // handle pending files related to the message
+
+    if (message.temp_id) {
+      handlePendingFiles(message.temp_id, message.id);
+    }
+
     // add message to the chat if it is currently open
 
     if (currRoom && message.room_id === currRoom.id) {
@@ -233,28 +238,63 @@ export default function App() {
     });
   }
 
+  function onNewFiles(files: FileInfo[]) {
+    const messageId = files[0].message_id;
+
+    const tempMsg = messages.find((v) => isMessage(v) && v.id === messageId);
+    if (!tempMsg) {
+      return;
+    }
+
+    const relevantMessage = tempMsg as Message;
+    relevantMessage.files = files;
+    setMessages([...messages]);
+  }
+
+  function isMessage(
+    msg: Message | SystemMessage | PendingMessage,
+  ): msg is Message {
+    return (msg as any).id !== undefined && (msg as any).username !== undefined;
+  }
+
   function sendMessage(newMessage: PendingMessage) {
     if (!ws) {
       setWsError("Connection is not available");
       return;
     }
 
-    pendingFiles.set(newMessage.temp_id, newMessage.files);
-    newMessage.files = [];
+    if (newMessage.files.length) {
+      pendingFiles.set(newMessage.temp_id, newMessage.files);
+    }
 
+    (newMessage as any).files = undefined;
     ws.send(JSON.stringify(newMessage));
   }
 
-  function handleMessage() {
+  async function handlePendingFiles(messageTempId: number, messageId: number) {
+    const files = pendingFiles.get(messageTempId);
+    pendingFiles.delete(messageTempId);
+    if (!files) {
+      return;
+    }
+
+    const result = await requests.filesMessagePost(messageId, files);
+    if (result.message) {
+      console.warn("Could not upload files:", result);
+      return;
+    }
+  }
+
+  function handleSendMessage() {
     if (!currRoom) {
       return;
     }
 
     const pendingMessage = {
-      temp_id: Math.floor(Math.random() * 1_000_000_000),
+      temp_id: getRandomId(),
       room_id: currRoom.id,
-      text: text,
-      files: files,
+      text: messageText,
+      files: messageFiles,
     };
 
     sendMessage(pendingMessage);
@@ -303,13 +343,13 @@ export default function App() {
         <ChatContainer
           headerHeight={headerHeight}
           room={currRoom}
-          text={text}
-          setText={setText}
-          files={files}
-          setFiles={setFiles}
+          text={messageText}
+          setText={setMessageText}
+          files={messageFiles}
+          setFiles={setMessageFiles}
           messages={messages}
           setMessages={setMessages}
-          sendMessage={handleMessage}
+          sendMessage={handleSendMessage}
           messageError={wsError}
         />
       </div>

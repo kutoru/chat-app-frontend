@@ -45,3 +45,7 @@ export function formatDateTime(timestampInSeconds: number): string {
     sec
   );
 }
+
+export function getRandomId() {
+  return Math.floor(Math.random() * 1_000_000_000);
+}

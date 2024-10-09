@@ -16,12 +16,17 @@ export default function MessageContainer({ message }: Props) {
     }
 
     for (let i = 0; i < message.files.length; i++) {
-      const url = global.API_URL + "/files/" + message.files[i].file_hash;
+      const file = message.files[i];
+      const url = global.API_URL + "/files/" + file.file_hash;
 
       images.push(
-        <a href={url} target="_blank">
+        <a key={file.id} href={url} target="_blank" className="relative">
+          <div
+            className="absolute size-full bg-transparent top-0 right-0 rounded-md"
+            style={{ boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.1)" }}
+          />
           <img
-            className="rounded-es-md w-full h-16 object-cover lg:h-20 xl:h-24"
+            className={"w-full h-16 object-cover rounded-md lg:h-20 xl:h-24"}
             src={url}
           />
         </a>,
@@ -72,7 +77,7 @@ export default function MessageContainer({ message }: Props) {
       {!!message.files?.length && <div className="h-[2px] bg-dark-1" />}
 
       {!!message.files?.length && (
-        <div className="grid grid-flow-row grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+        <div className="grid grid-flow-row p-0.5 gap-0.5 grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 lg:p-1 lg:gap-1">
           {mapImages()}
         </div>
       )}
