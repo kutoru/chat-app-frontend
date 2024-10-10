@@ -4,10 +4,10 @@ import AddIcon from "../../../assets/add.svg?react";
 import requests from "../../../requests";
 
 type Props = {
-  setFocusRoomId: (v: number | undefined) => void;
+  setFocusRoomData: (v: { id: number; setAt: number } | undefined) => void;
 };
 
-export default function NewChat({ setFocusRoomId }: Props) {
+export default function NewChat({ setFocusRoomData }: Props) {
   const [userError, setUserError] = useState<string | undefined>();
   const [userSuccess, setUserSuccess] = useState<string | undefined>();
   const [username, setUsername] = useState("");
@@ -31,7 +31,7 @@ export default function NewChat({ setFocusRoomId }: Props) {
       return;
     }
 
-    setFocusRoomId(result.data.id);
+    setFocusRoomData({ id: result.data.id, setAt: Date.now() });
     setUserSuccess("The chat has been started");
     setUsername("");
   }
@@ -51,7 +51,7 @@ export default function NewChat({ setFocusRoomId }: Props) {
       return;
     }
 
-    setFocusRoomId(result.data.id);
+    setFocusRoomData({ id: result.data.id, setAt: Date.now() });
     setGroupSuccess("The group has been created");
     setGroupName("");
   }

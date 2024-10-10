@@ -18,6 +18,8 @@ import { getRandomId } from "../../utils";
 import FileInfo from "../../types/FileInfo";
 import InviteUser from "./window-dialog/InviteUser";
 
+const ROOM_FOCUS_TIMEOUT = 5000; // ms
+
 enum WindowType {
   Hidden,
   Settings,
@@ -53,7 +55,10 @@ export default function App() {
 
   // mixed
   const [currRoom, setCurrRoom] = useState<RoomPreview>();
-  const [focusRoomId, setFocusRoomId] = useState<number>();
+  const [focusRoomData, setFocusRoomData] = useState<{
+    id: number;
+    setAt: number;
+  }>();
   const [pendingFiles] = useState(new Map<number, File[]>());
   const navigate = useNavigate();
 
@@ -94,23 +99,6 @@ export default function App() {
     }
   }, [windowType]);
 
-  // if there is a new request to focus (open) a room, handle it
-  useEffect(() => {
-    if (!focusRoomId) {
-      return;
-    }
-
-    const room = rooms.find((v) => v.id === focusRoomId);
-    if (room) {
-      setFocusRoomId(undefined);
-      openRoom(room);
-      return;
-    }
-
-    const timeoutId = setTimeout(() => setFocusRoomId(undefined), 2500);
-    return () => clearTimeout(timeoutId);
-  }, [focusRoomId, setFocusRoomId]);
-
   // websocket initialization
   useEffect(() => {
     if (!ws) {
@@ -125,7 +113,7 @@ export default function App() {
     ws.onmessage = (msg) => {
       try {
         const result = JSON.parse(msg.data);
-        console.log("onmessage", result);
+        console.log("New websocket message:", result);
 
         if (result.type === "message") {
           onNewMessage(result.data);
@@ -137,6 +125,27 @@ export default function App() {
       }
     };
   }, [ws, currRoom, messages, rooms]);
+
+  // listen to new rooms to focus them if needed
+  useEffect(() => {
+    if (
+      !focusRoomData ||
+      focusRoomData.setAt + ROOM_FOCUS_TIMEOUT < Date.now()
+    ) {
+      return;
+    }
+
+    const target = rooms.find((v) => v.id === focusRoomData.id);
+    if (!target) {
+      return;
+    }
+
+    setFocusRoomData(undefined);
+    openRoom(target);
+    if (windowShown) {
+      setWindowShown(false);
+    }
+  }, [rooms, focusRoomData, windowShown]);
 
   function openRoom(room: RoomPreview) {
     if (currRoom !== room) {
@@ -321,7 +330,7 @@ export default function App() {
           />
         )}
         {windowType === WindowType.AddChat && (
-          <NewChat setFocusRoomId={setFocusRoomId} />
+          <NewChat setFocusRoomData={setFocusRoomData} />
         )}
         {windowType === WindowType.InviteUser && (
           <InviteUser currRoom={currRoom} />
