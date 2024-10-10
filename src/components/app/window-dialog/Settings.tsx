@@ -5,13 +5,15 @@ import requests from "../../../requests";
 import User from "../../../types/User";
 import { formatDate } from "../../../utils";
 import global from "../../../global";
+import LogoutIcon from "../../../assets/logout.svg?react";
 
 type Props = {
   userInfo: User | undefined;
   setUserInfo: (v: User) => void;
+  navigate: (v: string) => void;
 };
 
-export default function Settings({ userInfo, setUserInfo }: Props) {
+export default function Settings({ userInfo, setUserInfo, navigate }: Props) {
   const [pfpError, setPfpError] = useState<string>();
 
   const [password, setPassword] = useState("");
@@ -97,6 +99,16 @@ export default function Settings({ userInfo, setUserInfo }: Props) {
     setPassword("");
     setNewPassword("");
     setRepeatedPass("");
+  }
+
+  async function logOut() {
+    const result = await requests.logout();
+    if (result.message) {
+      setPassError(result.message);
+      return;
+    }
+
+    navigate("/login");
   }
 
   return (
@@ -207,6 +219,17 @@ export default function Settings({ userInfo, setUserInfo }: Props) {
       />
 
       <div className="flex">
+        <button
+          onClick={logOut}
+          className={
+            "text-rose-500 py-2 px-4 rounded-md transition-all flex" +
+            " group/btn hover:text-rose-600 hover:bg-[#00000020] active:text-rose-700 active:bg-[#00000030]"
+          }
+        >
+          <LogoutIcon className="size-6 transition-all fill-rose-500 group-hover/btn:fill-rose-600 group-active/btn:fill-rose-700" />
+          <span className="ms-1 my-auto">Log out</span>
+        </button>
+
         <div className="flex-1" />
 
         <button

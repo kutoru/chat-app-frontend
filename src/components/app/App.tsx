@@ -314,7 +314,11 @@ export default function App() {
         onCloseClick={() => setWindowShown(false)}
       >
         {windowType === WindowType.Settings && (
-          <Settings userInfo={userInfo} setUserInfo={setUserInfo} />
+          <Settings
+            userInfo={userInfo}
+            setUserInfo={setUserInfo}
+            navigate={navigate}
+          />
         )}
         {windowType === WindowType.AddChat && (
           <NewChat setFocusRoomId={setFocusRoomId} />

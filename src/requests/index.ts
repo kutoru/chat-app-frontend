@@ -27,6 +27,10 @@ async function updatePassword(body: {
   return await callApi("/pass", "post", body);
 }
 
+async function logout(): Promise<ResponseBody<void>> {
+  return await callApi("/logout", "get");
+}
+
 async function userGet(): Promise<ResponseBody<User>> {
   return await callApi("/users", "get");
 }
@@ -147,6 +151,7 @@ export default {
   login,
   register,
   updatePassword,
+  logout,
   userGet,
   filesPfpPost,
   filesMessagePost,
