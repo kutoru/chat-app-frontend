@@ -91,6 +91,13 @@ async function roomsGroupPost(body: {
   return await callApi("/rooms/group", "post", body);
 }
 
+async function roomsIdInvitePost(
+  roomId: number,
+  body: { username: string },
+): Promise<ResponseBody<void>> {
+  return await callApi(`/rooms/${roomId}/invite`, "post", body);
+}
+
 async function getMessages(
   roomId: number,
   abortSignal?: AbortSignal,
@@ -139,5 +146,6 @@ export default {
   getRoomById,
   roomsDirectPost,
   roomsGroupPost,
+  roomsIdInvitePost,
   getMessages,
 };

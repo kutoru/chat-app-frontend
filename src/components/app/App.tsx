@@ -16,11 +16,13 @@ import PendingMessage from "../../types/PendingMessage";
 import global from "../../global";
 import { getRandomId } from "../../utils";
 import FileInfo from "../../types/FileInfo";
+import InviteUser from "./window-dialog/InviteUser";
 
 enum WindowType {
   Hidden,
   Settings,
   AddChat,
+  InviteUser,
 }
 
 export default function App() {
@@ -207,7 +209,7 @@ export default function App() {
 
     if (currRoom && message.room_id === currRoom.id) {
       const replaceIndex = messages.findIndex(
-        (v: any) => v.temp_id === message.temp_id,
+        (v: any) => message.temp_id && v.temp_id === message.temp_id,
       );
 
       if (replaceIndex === -1) {
@@ -317,6 +319,9 @@ export default function App() {
         {windowType === WindowType.AddChat && (
           <NewChat setFocusRoomId={setFocusRoomId} />
         )}
+        {windowType === WindowType.InviteUser && (
+          <InviteUser currRoom={currRoom} />
+        )}
       </WindowDialog>
 
       <ChatHeader
@@ -325,6 +330,7 @@ export default function App() {
         headerHeight={headerHeight}
         setHeaderHeight={setHeaderHeight}
         onSettingsClick={onSettingsClick}
+        onAddClick={() => setWindowType(WindowType.InviteUser)}
         currRoom={currRoom}
       />
 

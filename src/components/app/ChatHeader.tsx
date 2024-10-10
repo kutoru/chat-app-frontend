@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import RoomPreview from "../../types/RoomPreview";
 import global from "../../global";
 import DefaultPfpIcon from "../../assets/default-pfp.svg?react";
+import AddIcon from "../../assets/add.svg?react";
 
 type Props = {
   expanded: boolean;
@@ -11,6 +12,7 @@ type Props = {
   headerHeight: number;
   setHeaderHeight: (v: number) => void;
   onSettingsClick: () => void;
+  onAddClick: () => void;
   currRoom: RoomPreview | undefined;
 };
 
@@ -20,6 +22,7 @@ export default function ChatHeader({
   headerHeight,
   setHeaderHeight,
   onSettingsClick,
+  onAddClick,
   currRoom,
 }: Props) {
   const header = useRef<HTMLDivElement>(null);
@@ -61,7 +64,7 @@ export default function ChatHeader({
         </button>
       </div>
 
-      <div className="flex-1 p-1 md:p-2 flex gap-2">
+      <div className="flex-1 p-1 md:p-2 flex">
         <button
           onClick={() => setExpanded(false)}
           className={
@@ -76,7 +79,7 @@ export default function ChatHeader({
           <>
             <div
               className={
-                "border-2 border-neutral-400 rounded-full size-[calc(2.5rem-2px)] flex-none" +
+                "border-2 border-neutral-400 rounded-full size-[calc(2.5rem-2px)] flex-none ms-2" +
                 (!currRoom.cover_image ? " p-1" : "")
               }
             >
@@ -90,11 +93,25 @@ export default function ChatHeader({
               )}
             </div>
 
-            <div className="text-lg my-auto line-clamp-1">
+            <div className="text-lg my-auto line-clamp-1 break-words flex-none max-w-48 ms-2 md:max-w-64 lg:max-w-lg xl:max-w-3xl">
               {currRoom.type === "direct" && "@"}
               {currRoom.name}
             </div>
           </>
+        )}
+
+        <div className="flex-1" />
+
+        {currRoom?.type === "group" && (
+          <button
+            onClick={onAddClick}
+            className={
+              "group/btn size-10 p-1 transition-all rounded-md flex-none ms-2" +
+              " hover:bg-[#00000020] active:bg-[#00000030]"
+            }
+          >
+            <AddIcon className="size-full transition-all group-hover/btn:fill-neutral-300 group-active/btn:fill-neutral-400" />
+          </button>
         )}
       </div>
     </div>
