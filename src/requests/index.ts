@@ -20,6 +20,13 @@ async function register(body: {
   return await callApi("/register", "post", body);
 }
 
+async function updatePassword(body: {
+  oldPassword: string;
+  newPassword: string;
+}): Promise<ResponseBody<void>> {
+  return await callApi("/pass", "post", body);
+}
+
 async function userGet(): Promise<ResponseBody<User>> {
   return await callApi("/users", "get");
 }
@@ -139,6 +146,7 @@ async function callApi<RequestBody, ResponseData>(
 export default {
   login,
   register,
+  updatePassword,
   userGet,
   filesPfpPost,
   filesMessagePost,

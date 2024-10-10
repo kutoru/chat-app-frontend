@@ -13,9 +13,12 @@ type Props = {
 
 export default function Settings({ userInfo, setUserInfo }: Props) {
   const [pfpError, setPfpError] = useState<string>();
+
   const [password, setPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [repeatedPass, setRepeatedPass] = useState("");
   const [passError, setPassError] = useState<string>();
+  const [passSuccess, setPassSuccess] = useState<string>();
 
   async function uploadImage() {
     if (!userInfo) {
@@ -53,7 +56,47 @@ export default function Settings({ userInfo, setUserInfo }: Props) {
   }
 
   async function changePassword() {
-    setPassError("Not implemented");
+    setPassError(undefined);
+    setPassSuccess(undefined);
+
+    if (!password) {
+      setPassError("Enter your current password");
+      return;
+    }
+
+    if (!newPassword) {
+      setPassError("Enter a new password");
+      return;
+    }
+
+    if (newPassword.length < 4) {
+      setPassError("The new password is too short");
+      return;
+    }
+
+    if (!repeatedPass) {
+      setPassError("Re-enter the new password");
+      return;
+    }
+
+    if (repeatedPass !== newPassword) {
+      setPassError("The new passwords don't match");
+      return;
+    }
+
+    const result = await requests.updatePassword({
+      oldPassword: password,
+      newPassword: newPassword,
+    });
+    if (result.message) {
+      setPassError(result.message);
+      return;
+    }
+
+    setPassSuccess("The password has been successfully updated");
+    setPassword("");
+    setNewPassword("");
+    setRepeatedPass("");
   }
 
   return (
@@ -120,15 +163,32 @@ export default function Settings({ userInfo, setUserInfo }: Props) {
         Change your password
       </div>
 
+      {passSuccess && (
+        <div className="text-green-400 mb-4 text-center md:mb-5">
+          {passSuccess}
+        </div>
+      )}
+
       {passError && (
         <div className="text-red-500 mb-4 text-center md:mb-5">{passError}</div>
       )}
 
       <input
         type="password"
-        placeholder="New password"
+        placeholder="Old password"
         value={password}
         onInput={(e) => setPassword((e.target as HTMLInputElement).value)}
+        className={
+          "w-full bg-dark-3 p-2 rounded-md mb-4 md:mb-5 " +
+          "focus:outline focus:outline-2 focus:outline-rose-600"
+        }
+      />
+
+      <input
+        type="password"
+        placeholder="New password"
+        value={newPassword}
+        onInput={(e) => setNewPassword((e.target as HTMLInputElement).value)}
         className={
           "w-full bg-dark-3 p-2 rounded-md mb-4 md:mb-5 " +
           "focus:outline focus:outline-2 focus:outline-rose-600"
